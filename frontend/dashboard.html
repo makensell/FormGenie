@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FormGenie - Auto Form Filler</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script src="script.js" defer></script>
+  <script defer>
+    function toggleInstructions() {
+      const panel = document.getElementById("instructionsPanel");
+      const arrow = document.getElementById("arrowIcon");
+      panel.classList.toggle("translate-x-full");
+      arrow.textContent = panel.classList.contains("translate-x-full") ? "📌 Show Instructions" : "✖";
+    }
+  </script>
+  <style>
+    body {
+      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .glow {
+      animation: glow 2s infinite alternate;
+    }
+    @keyframes glow {
+      0% { box-shadow: 0 0 5px #00ffc8; }
+      100% { box-shadow: 0 0 20px #00ffc8; }
+    }
+    .fade-in {
+      animation: fadeIn 1.5s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body class="text-white p-8 relative overflow-x-hidden">
+
+  <div class="max-w-2xl mx-auto text-center fade-in">
+    <h1 class="text-4xl font-bold mb-4">🚀 Genie</h1>
+    <p class="mb-6 text-gray-300">Auto-fill any Google Form smartly & efficiently. No setup needed.</p>
+
+    <form id="formGenie" class="space-y-6">
+      <input type="url" id="formLink" placeholder="Paste your Google Form link here" required
+        class="w-full p-3 rounded bg-gray-800 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+
+      <div class="flex justify-between gap-4">
+        <input type="number" id="responseCount" min="1" max="50" value="5"
+          class="w-1/2 p-3 rounded bg-gray-800 border border-gray-600 focus:outline-none"
+          placeholder="Number of Responses" />
+        <select id="speed" class="w-1/2 p-3 rounded bg-gray-800 border border-gray-600 focus:outline-none">
+          <option value="fast">Fast</option>
+          <option value="normal">Normal</option>
+          <option value="slow">Slow</option>
+        </select>
+      </div>
+
+      <!-- 📌 Toggle Instructions Button -->
+      <div class="flex justify-end">
+        <button type="button" onclick="toggleInstructions()" class="text-yellow-300 hover:text-yellow-400 text-sm focus:outline-none">
+          <span id="arrowIcon">📌 Show Instructions</span>
+        </button>
+      </div>
+
+      <button id="start-btn" type="submit"
+        class="bg-green-500 glow px-6 py-3 rounded font-bold text-black hover:bg-green-600 transition">
+        ✅ Start Auto-Filling
+      </button>
+    </form>
+
+    <div id="statusMessage" class="mt-6 text-lg font-medium text-blue-300"></div>
+  </div>
+
+  <!-- 🎯 Sliding Instruction Panel -->
+  <div id="instructionsPanel"
+    class="fixed top-0 right-0 w-80 max-w-full h-full bg-gradient-to-br from-yellow-100 via-pink-100 to-purple-100 text-gray-800 p-6 shadow-2xl transform translate-x-full transition-transform duration-500 z-50 overflow-y-auto">
+    <h2 class="text-xl font-semibold mb-4">📋 Instructions</h2>
+    <ul class="list-disc list-inside space-y-2 text-sm">
+      <li>Form must be <strong>public</strong> and accepting responses.</li>
+      <li><strong>“Sign in required” must be OFF</strong> in form settings.</li>
+      <li><strong>No CAPTCHA or file upload</strong> should exist.</li>
+      <li>Use only MCQs, dropdowns, or short answer type questions.</li>
+      <li>Remove personal fields like <strong>Name, Address, Email</strong>.</li>
+      <li>Maximum <strong>3 forms per user per day</strong>.</li>
+      <li>Answers are selected using smart randomness & logic.</li>
+    </ul>
+  </div>
+
+  <!--  Clean Footer -->
+  <footer class="text-center mt-10 p-4 text-sm text-gray-400">
+    <hr class="border-gray-600 mb-2" />
+    <p>⚡ Made with love from Mohit</p>
+  </footer>
+
+</body>
+</html>

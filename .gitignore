@@ -1,10 +1,14 @@
-node_modules/
+# Ignore system and user folders
+AppData/
+Desktop/
+Downloads/
+Documents/
 *.log
-*.pyc
+*.dat
+node_modules/
+.env
 __pycache__/
 .vscode/
-*.db
-AppData/
-NTUSER*
-*.ini
-*.dat
+*.pyc
+*.pyo
+*.pyd

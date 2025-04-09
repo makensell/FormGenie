@@ -1,1 +1,1 @@
-flaskseleniumfake-useragentrequestsbeautifulsoup4
+flaskseleniumfake-useragentrequestsbeautifulsoup4triotrio-websocket

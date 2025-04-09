@@ -1,1 +1,1 @@
-flaskseleniumfake-useragentrequestsbeautifulsoup4triotrio-websocket
+flask==3.1.0flask_cors==4.0.0selenium==4.31.0beautifulsoup4==4.13.3fake-useragent==2.1.0requests==2.32.3trio==0.29.0trio-websocket==0.12.2

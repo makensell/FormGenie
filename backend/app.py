@@ -3,98 +3,68 @@ from flask_cors import CORS
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
-import random
 import time
+import random
 import names
-import string
+import threading
 
 app = Flask(__name__)
 CORS(app)
 
-# Generate random email, age, and address
-def generate_email(name):
-    domains = ["@gmail.com", "@yahoo.com", "@outlook.com"]
-    return name.lower().replace(" ", "") + str(random.randint(10, 999)) + random.choice(domains)
+def fill_form(link, count, speed):
+    options = Options()
+    options.add_argument("--headless")
+    options.add_argument("--disable-gpu")
+    driver = webdriver.Chrome(options=options)
 
-def generate_age():
-    return str(random.randint(18, 45))
+    for i in range(count):
+        driver.get(link)
+        time.sleep(random.uniform(1, 2))  # simulate loading
 
-def generate_address():
-    streets = ["MG Road", "Park Street", "Brigade Road", "Linking Road", "Hilltop Area"]
-    cities = ["Delhi", "Bangalore", "Mumbai", "Hyderabad", "Chennai"]
-    return f"{random.randint(101, 999)}, {random.choice(streets)}, {random.choice(cities)}"
+        inputs = driver.find_elements(By.CSS_SELECTOR, 'input[type="text"]')
+        for input_box in inputs:
+            if "name" in input_box.get_attribute('aria-label').lower():
+                input_box.send_keys(names.get_full_name())
+            elif "age" in input_box.get_attribute('aria-label').lower():
+                input_box.send_keys(str(random.randint(18, 35)))
+            elif "email" in input_box.get_attribute('aria-label').lower():
+                input_box.send_keys(f"user{random.randint(100,999)}@example.com")
+            elif "address" in input_box.get_attribute('aria-label').lower():
+                input_box.send_keys("123, Random Street, India")
+            else:
+                input_box.send_keys("Sample Answer")
 
-def get_random_delay(speed):
-    if speed == "fast":
-        return random.uniform(0.5, 1)
-    elif speed == "medium":
-        return random.uniform(1.5, 2.5)
-    else:  # slow
-        return random.uniform(3, 4)
+        # select radio buttons or checkboxes randomly
+        choices = driver.find_elements(By.CSS_SELECTOR, 'div[role="radio"], div[role="checkbox"]')
+        clicked = set()
+        for choice in choices:
+            if choice not in clicked and random.random() < 0.6:
+                driver.execute_script("arguments[0].click();", choice)
+                clicked.add(choice)
 
-@app.route('/fill-form', methods=['POST'])
-def fill_form():
+        submit_button = driver.find_element(By.XPATH, '//span[text()="Submit"]/..')
+        driver.execute_script("arguments[0].click();", submit_button)
+
+        time.sleep(speed)
+
+    driver.quit()
+
+@app.route('/submit', methods=['POST'])
+def submit():
     data = request.get_json()
-    form_link = data.get("formLink")
-    response_count = int(data.get("responseCount", 1))
-    speed = data.get("speed", "medium")
+    link = data.get('link')
+    count = int(data.get('count', 1))
+    speed = float(data.get('speed', 2))
 
-    chrome_options = Options()
-    chrome_options.add_argument("--headless=new")
-    chrome_options.add_argument("--disable-gpu")
-    chrome_options.add_argument("--log-level=3")
+    thread = threading.Thread(target=fill_form, args=(link, count, speed))
+    thread.start()
 
-    for _ in range(response_count):
-        driver = webdriver.Chrome(options=chrome_options)
-        driver.get(form_link)
-        time.sleep(get_random_delay(speed))
+    return jsonify({"message": "Form submission started!"}), 200
 
-        questions = driver.find_elements(By.CSS_SELECTOR, "div[role='list'] > div")
-        for q in questions:
-            try:
-                # Text inputs (name, age, etc.)
-                input_field = q.find_element(By.CSS_SELECTOR, "input[type='text']")
-                label = q.text.lower()
-
-                if "name" in label:
-                    value = names.get_full_name()
-                elif "email" in label:
-                    name_for_email = names.get_first_name()
-                    value = generate_email(name_for_email)
-                elif "age" in label:
-                    value = generate_age()
-                elif "address" in label:
-                    value = generate_address()
-                else:
-                    value = "Sample Answer"
-
-                input_field.send_keys(value)
-                time.sleep(get_random_delay(speed))
-
-            except:
-                try:
-                    # Multiple choice options
-                    options = q.find_elements(By.CSS_SELECTOR, "div[role='radio']")
-                    if options:
-                        weights = [0.6, 0.3, 0.1] + [0.05] * (len(options) - 3)
-                        choice = random.choices(options, weights=weights[:len(options)], k=1)[0]
-                        driver.execute_script("arguments[0].click();", choice)
-                        time.sleep(get_random_delay(speed))
-                except:
-                    pass
-
-        try:
-            submit_btn = driver.find_element(By.XPATH, "//span[text()='Submit']/ancestor::div[@role='button']")
-            driver.execute_script("arguments[0].click();", submit_btn)
-            time.sleep(2)
-        except:
-            driver.quit()
-            return jsonify({"message": "Form submission failed. Could not find the submit button."}), 500
-
-        driver.quit()
-
-    return jsonify({"message": "<span class='text-light-cyan-400 font-semibold'>😁 Form filled successfully </span>"}), 200
-
+# ✅ New route to fix 404 error
+@app.route('/')
+def home():
+    return "FormGenie backend is running ✅"
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=10000)
